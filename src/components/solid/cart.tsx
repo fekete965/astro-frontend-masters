@@ -1,11 +1,16 @@
 import { useStore } from '@nanostores/solid';
-import { cart, removeItemFromCart, subtotal } from '../stores/cart';
+import {
+	$cart as cart,
+	removeItemFromCard,
+	$subtotal as subtotal,
+} from '../../stores/cart';
 import styles from './cart.module.css';
+
 import { Show, createSignal } from 'solid-js';
 
-function formatCurrency(amount: number) {
-	return new Intl.NumberFormat('en-US', {
-		currency: 'usd',
+function formatCurrency(amount: number): string {
+	return new Intl.NumberFormat('en-GB', {
+		currency: 'gbp',
 		style: 'currency',
 	}).format(amount);
 }
@@ -14,12 +19,12 @@ const EmptyState = () => {
 	return (
 		<>
 			<p class={styles.icon}>
-				<span role="img" aria-label="hot dog">
+				<span aria-label="hot dog" role="img">
 					🌭
 				</span>
 			</p>
 			<p class={styles.empty}>
-				Your cart is empty! Add a sandwich kit or two and give flavor a chance.
+				Your cart is empty. Add a sandwich kit or to and give flavour a chance.
 			</p>
 		</>
 	);
@@ -31,15 +36,15 @@ const CheckoutNotice = () => {
 
 export const Cart = () => {
 	const [showNotice, setShowNotice] = createSignal(false);
-	const $cart = useStore(cart);
 	const $subtotal = useStore(subtotal);
+	const $cart = useStore(cart);
 
 	return (
 		<aside class={styles.cart}>
 			<h2>Your Cart</h2>
 			<Show when={Object.values($cart()).length > 0} fallback={<EmptyState />}>
 				<ul class={styles.items}>
-					{Object.values($cart()).map((entry) => {
+					{Object.values($cart()).map((entry?: CartItem) => {
 						if (!entry) {
 							return null;
 						}
@@ -51,7 +56,7 @@ export const Cart = () => {
 								<span class={styles.remove}>
 									<button
 										title="remove item"
-										onClick={() => removeItemFromCart(entry.item.id)}
+										onclick={() => removeItemFromCard(entry)}
 									>
 										&times;
 									</button>
@@ -63,15 +68,13 @@ export const Cart = () => {
 						);
 					})}
 				</ul>
-
 				<div class={styles.details}>
 					<p class={styles.subtotal}>
 						<span class={styles.label}>Subtotal:</span>{' '}
 						{formatCurrency($subtotal())}
 					</p>
 					<p class={styles.shipping}>
-						<span class={styles.label}>Shipping:</span>
-						<del>$10.00</del>
+						<span class={styles.label}>Shipping:</span> <del>£10.00</del>
 						<ins>FREE</ins>
 					</p>
 					<p class={styles.total}>
